@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# extract.py
+# summarize.py
 #
 
 
@@ -13,7 +13,7 @@ from pathlib import Path
 def main():
 
     if len(sys.argv) < 2:
-        print("Usage: extract.py /path/to/shapefile")
+        print("Usage: summarize.py /path/to/shapefile")
         sys.exit(1)
 
     input_path = sys.argv[1]
@@ -26,13 +26,8 @@ def main():
     records = sf.records()
     shapes = sf.shapes()
 
-    shape_records = [{'name':record.Name, 'puma':record.PUMA, 'points':shape.points} \
-            for record, shape in zip(records, shapes) if "Los Angeles" in record.Name]
-
-    print(f"shape_records: {len(shape_records)}")
-
-    with open("shape_records.json", 'w') as f:
-        json.dump(shape_records, f)
+    for record, shape in zip(records, shapes):
+        print(record.Name, record.PUMA, len(shape.points))
 
 
 if __name__ == '__main__':
