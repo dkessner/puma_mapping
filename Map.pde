@@ -23,8 +23,10 @@ public class Map
 
     void initialize_shape_records()
     {
+        // read in shape records from json file
+
         JSONArray json_shape_records = loadJSONArray("shape_records.json");
-        println(json_shape_records.size());
+        println("shape records: " + json_shape_records.size());
 
         shape_records = new ArrayList<ShapeRecord>();
 
@@ -33,14 +35,6 @@ public class Map
             JSONObject json = json_shape_records.getJSONObject(i);
             shape_records.add(new ShapeRecord(json));
         }
-
-        /*
-        for (ShapeRecord shape_record : shape_records)
-        {
-            println(shape_record.name);
-            println(shape_record.points.size());
-        }
-        */
 
         // calculate bounding box
 
@@ -64,6 +58,31 @@ public class Map
     {
         rect(rectX, rectY, rectW, rectH);
 
+        // draw each ShapeRecord
+
+        for (int i=0; i<shape_records.size(); i++)
+        {
+            ShapeRecord shape_record = shape_records.get(i);
+
+            shape_record.display(rectX, rectY, rectW, rectH,
+                                 xMin, yMin, xMax, yMax);
+        }
+
+        // display selected 
+
+        ShapeRecord selected = selected(rectX, rectY, rectW, rectH);
+
+        fill(0, 255, 0);
+        selected.display(rectX, rectY, rectW, rectH,
+                         xMin, yMin, xMax, yMax);
+
+        textSize(20);
+        text(selected.name, width*.2, height-50);
+        text(selected.puma, width*.2, height-25);
+    }
+
+    ShapeRecord selected(float rectX, float rectY, float rectW, float rectH)
+    {
         // calculate hover by smallest distance to center
 
         int hoverIndex = 0;
@@ -84,34 +103,7 @@ public class Map
             }
         }
 
-        // draw each ShapeRecord
-
-        for (int i=0; i<shape_records.size(); i++)
-        {
-            ShapeRecord shape_record = shape_records.get(i);
-
-            // change color if hovering over this one
-            if (i == hoverIndex)
-                fill(0, 255, 0);
-            else
-                fill(255);
-
-            beginShape();
-            for (PVector p : shape_record.points)
-            {
-                float x = map(p.x, xMin, xMax, rectX, rectX+rectW);
-                float y = map(p.y, yMin, yMax, rectY+rectH, rectY); // note: flip
-                vertex(x, y);
-            }
-            endShape();
-        }
-
-        // display name of selected record
-
-        ShapeRecord record_hover = shape_records.get(hoverIndex);
-        textSize(20);
-        text(record_hover.name, width*.2, height-50);
-        text(record_hover.puma, width*.2, height-25);
+        return shape_records.get(hoverIndex);
     }
 }
 
@@ -142,6 +134,19 @@ class ShapeRecord
         for (PVector p : points)
             center.add(p);
         center.div(points.size());
+    }
+
+    void display(float rectX, float rectY, float rectW, float rectH,
+                 float xMin, float yMin, float xMax, float yMax)
+    {
+        beginShape();
+        for (PVector p : points)
+        {
+            float x = map(p.x, xMin, xMax, rectX, rectX+rectW);
+            float y = map(p.y, yMin, yMax, rectY+rectH, rectY); // note: flip
+            vertex(x, y);
+        }
+        endShape();
     }
 }
 
