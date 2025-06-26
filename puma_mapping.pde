@@ -10,7 +10,7 @@ void setup()
 {
     size(800, 800);
 
-    map = new Map();
+    map = new Map(100, 100, width-200, height-200);
 }
 
 
@@ -19,8 +19,7 @@ void draw()
     background(100);
 
     fill(200);
-    //map.display(0, 0, width, height);
-    map.display(100, 100, width-200, height-200);
+    map.display();
 }
 
 

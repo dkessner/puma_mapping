@@ -3,37 +3,53 @@
 //
 
 
-import java.util.*;
-import processing.core.*;
-
-
 public class Map
 {
-    ArrayList<ShapeRecord> shape_records;
+    private float rectX;
+    private float rectY;
+    private float rectW;
+    private float rectH;
 
-    float xMin = Float.MAX_VALUE;
-    float xMax = -Float.MAX_VALUE;
-    float yMin = Float.MAX_VALUE;
-    float yMax = -Float.MAX_VALUE;
+    private ArrayList<ShapeRecord> shape_records;
 
-    public Map()
+    private float xMin = Float.MAX_VALUE;
+    private float xMax = -Float.MAX_VALUE;
+    private float yMin = Float.MAX_VALUE;
+    private float yMax = -Float.MAX_VALUE;
+
+    public Map(float rectX, float rectY, float rectW, float rectH)
     {
+        this.rectX = rectX;
+        this.rectY = rectY;
+        this.rectW = rectW;
+        this.rectH = rectH;
+
         initialize_shape_records();
     }
 
-    void initialize_shape_records()
+    public float worldToScreenX(float x)
+    {
+        return map(x, xMin, xMax, rectX, rectX+rectW);
+    }
+
+    public float worldToScreenY(float y)
+    {
+        return map(y, yMin, yMax, rectY+rectH, rectY); // note: flip
+    }
+
+    private void initialize_shape_records()
     {
         // read in shape records from json file
 
         JSONArray json_shape_records = loadJSONArray("shape_records.json");
-        println("shape records: " + json_shape_records.size());
+        println("[Map] shape records: " + json_shape_records.size());
 
         shape_records = new ArrayList<ShapeRecord>();
 
         for (int i=0; i<json_shape_records.size(); i++)
         {
             JSONObject json = json_shape_records.getJSONObject(i);
-            shape_records.add(new ShapeRecord(json));
+            shape_records.add(new ShapeRecord(this, json));
         }
 
         // calculate bounding box
@@ -49,39 +65,31 @@ public class Map
             }
         }
 
-        println("x range: ", xMin, xMax);
-        println("y range: ", yMin, yMax);
+        println("[Map] x range: ", xMin, xMax);
+        println("[Map] y range: ", yMin, yMax);
     }
 
-
-    void display(float rectX, float rectY, float rectW, float rectH)
+    void display()
     {
         rect(rectX, rectY, rectW, rectH);
 
         // draw each ShapeRecord
 
-        for (int i=0; i<shape_records.size(); i++)
-        {
-            ShapeRecord shape_record = shape_records.get(i);
-
-            shape_record.display(rectX, rectY, rectW, rectH,
-                                 xMin, yMin, xMax, yMax);
-        }
+        for (ShapeRecord shape_record : shape_records)
+            shape_record.display();
 
         // display selected 
 
-        ShapeRecord selected = selected(rectX, rectY, rectW, rectH);
-
+        ShapeRecord selected = selected();
         fill(0, 255, 0);
-        selected.display(rectX, rectY, rectW, rectH,
-                         xMin, yMin, xMax, yMax);
+        selected.display();
 
         textSize(20);
         text(selected.name, width*.2, height-50);
         text(selected.puma, width*.2, height-25);
     }
 
-    ShapeRecord selected(float rectX, float rectY, float rectW, float rectH)
+    ShapeRecord selected()
     {
         // calculate hover by smallest distance to center
 
@@ -92,8 +100,9 @@ public class Map
         {
             ShapeRecord shape_record = shape_records.get(i);
 
-            float cx = map(shape_record.center.x, xMin, xMax, rectX, rectX+rectW);
-            float cy = map(shape_record.center.y, yMin, yMax, rectY+rectH, rectY); // note: flip
+            float cx = worldToScreenX(shape_record.center.x);
+            float cy = worldToScreenY(shape_record.center.y);
+
             float d = dist(mouseX, mouseY, cx, cy);
 
             if (d < smallestDistance)
@@ -110,13 +119,15 @@ public class Map
 
 class ShapeRecord
 {
+    Map map; // back reference for coordinate conversion
     String name;
     String puma;
     ArrayList<PVector> points;
     PVector center;
 
-    public ShapeRecord(JSONObject json)
+    public ShapeRecord(Map map, JSONObject json)
     {
+        this.map = map;
         name = json.getString("name");
         puma = json.getString("puma");
         points = new ArrayList<PVector>();
@@ -136,18 +147,16 @@ class ShapeRecord
         center.div(points.size());
     }
 
-    void display(float rectX, float rectY, float rectW, float rectH,
-                 float xMin, float yMin, float xMax, float yMax)
+    void display()
     {
         beginShape();
         for (PVector p : points)
         {
-            float x = map(p.x, xMin, xMax, rectX, rectX+rectW);
-            float y = map(p.y, yMin, yMax, rectY+rectH, rectY); // note: flip
+            float x = map.worldToScreenX(p.x);
+            float y = map.worldToScreenY(p.y); // note: flip
             vertex(x, y);
         }
         endShape();
     }
 }
-
 
