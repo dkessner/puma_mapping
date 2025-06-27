@@ -10,6 +10,7 @@
 ├── puma_mapping.pde            # Processing example
 ├── Map.pde                     # Map and ShapeRecord classes for json data handling
 ├── shape_records.json          # shape data for LA County PUMAs
+├── data_population.csv         # population data by PUMA
 │
 ├── poc                         # original Proof of Concept program
 │   ├── poc.pde
