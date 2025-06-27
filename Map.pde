@@ -147,7 +147,7 @@ public class ShapeRecord
         endShape();
     }
 
-    public String getPuma() {return puma;}
+    public int getPuma() {return Integer.parseInt(puma);}
     public String getName() {return name;}
 }
 
