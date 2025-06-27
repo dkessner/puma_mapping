@@ -25,7 +25,18 @@ void initializeData()
     pumaPopulationMap.put(3733,110720);
     pumaPopulationMap.put(3732,171797);
     pumaPopulationMap.put(3734,195666);
+
+    //pumaPopulationMap.get(3733); // returns 110720
 }
+
+
+// TODO:
+// To read in data_population.csv:
+//    1) loadStrings("data_population.csv")  ->  String[]
+//    2) for each line:
+//          split into fields  (String split() function)
+//          put data into pumaPopulationMap
+//
 
 
 void draw()
@@ -60,5 +71,3 @@ void draw()
     if (population != null)
         text("population: " + population, width/2, height-25);
 }
-
-
