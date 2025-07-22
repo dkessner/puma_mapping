@@ -49,6 +49,7 @@ void draw()
     map.displayBackground();
 
     fill(255);
+    stroke(0);
     map.displayShapes();
 
     // display the selected ShapeRecord in a different color
@@ -59,15 +60,35 @@ void draw()
 
     // display information related to selected ShapeRecord
 
-    int puma = selected.getPuma();
+    int puma_selected = selected.getPuma();
 
     textSize(20);
     textAlign(CENTER);
 
     text(selected.getName(), width/2, height-75);
-    text(puma, width/2, height-50);
+    text(puma_selected, width/2, height-50);
 
-    Integer population = pumaPopulationMap.get(puma);
-    if (population != null)
-        text("population: " + population, width/2, height-25);
+    Integer population_selected = pumaPopulationMap.get(puma_selected);
+    if (population_selected != null)
+        text("population: " + population_selected, width/2, height-25);
+
+
+    // display overlay
+
+    for (ShapeRecord shapeRecord : map.shapeRecords) // iterate through all shapes
+    {
+        // get the puma, and the population
+        int puma = shapeRecord.getPuma();
+        Integer population = pumaPopulationMap.get(puma);
+        if (population == null)
+            continue;
+
+        // compute a grey value based on the population
+        int value = int(map(population, 100000, 200000, 128, 0));
+        fill(value);
+        stroke(255);
+        shapeRecord.display();
+    }
 }
+
+
